@@ -1,3 +1,11 @@
 .history/*
 .venv/
 __pycache__/
+task2/checkpoint/*
+task2/dataset/*
+task2/venv
+task2/submission.csv
+task2/Task-2- Risk-Modeling-marketing.pdf
+.history/*
+.venv/
+__pycache__/
