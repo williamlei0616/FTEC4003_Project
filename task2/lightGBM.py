@@ -1,6 +1,7 @@
 import pandas as pd
 from imblearn.over_sampling import SMOTE, SMOTENC
 from sklearn.preprocessing import RobustScaler, StandardScaler
+from sklearn.decomposition import PCA
 
 # Load the datasets
 train_transactions = pd.read_csv("dataset/globalmart_train_transactions.csv")
@@ -319,7 +320,8 @@ for col in X.columns:
         X[col] = X[col].fillna("-1")
         X[col] = X[col].astype(str)
     else:
-        X[col] = X[col].fillna(-1)
+        X[col] = X[col].fillna(0)
+
 
 # --- Normalize Numerical Features ---
 # Identify numerical columns (exclude categorical, OrderID, and missing flags)
@@ -332,9 +334,9 @@ numerical_cols = [
     and X[col].dtype != "object"
 ]
 
-print(f"Normalizing {len(numerical_cols)} numerical features...")
-scaler = StandardScaler()
-X[numerical_cols] = scaler.fit_transform(X[numerical_cols])
+# print(f"Normalizing {len(numerical_cols)} numerical features...")
+# scaler = StandardScaler()
+# X[numerical_cols] = scaler.fit_transform(X[numerical_cols])
 
 print("Starting SMOTE resampling...")
 if categorical_columns:
@@ -344,7 +346,7 @@ else:
     smote = SMOTE(random_state=42)
 
 X_resampled, y_resampled = smote.fit_resample(X, y)
-
+# X_resampled, y_resampled = X, y
 print(f"Original shape: {X.shape}")
 print(f"Resampled shape: {X_resampled.shape}")
 print(f"Class distribution after resampling:\n{y_resampled.value_counts()}")
@@ -364,7 +366,7 @@ def _build_lgbm_classifier(use_gpu: bool):
     params = dict(
         n_estimators=3000,
         num_leaves=40,
-        max_depth=10,
+        max_depth=15,
         min_child_samples=70,
         reg_alpha=0.1,  # L1 Regularization
         reg_lambda=0.1,  # L2 Regularization
@@ -415,8 +417,8 @@ for col in X_test.columns:
 # Apply the same normalization to Test
 # Ensure we only transform columns that exist in X_test (should be all of them if logic is correct)
 valid_numerical_cols = [c for c in numerical_cols if c in X_test.columns]
-if valid_numerical_cols:
-    X_test[valid_numerical_cols] = scaler.transform(X_test[valid_numerical_cols])
+# if valid_numerical_cols:
+#     X_test[valid_numerical_cols] = scaler.transform(X_test[valid_numerical_cols])
 
 # 3. Convert Categorical Columns to 'category' dtype for LightGBM
 # LightGBM handles 'category' dtype efficiently
