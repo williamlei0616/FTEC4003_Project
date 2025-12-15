@@ -64,7 +64,8 @@ categorical_columns = [
     "MatchStatus9",
 ]  # Put your categorical column names here
 
-# Separate Features and Target
+
+
 X = merged_df.drop(
     columns=[
         target_col,
@@ -197,7 +198,6 @@ X = merged_df.drop(
         "V197",
         "V199",
         "V200",
-        "V201",
         "V202",
         "V204",
         "V206",
@@ -287,8 +287,9 @@ X = merged_df.drop(
         "V337",
         "V338",
         "V339",
-    ]
+    ] 
 )
+    
 y = merged_df[target_col]
 
 # --- Drop High Missing Value Columns ---
@@ -337,6 +338,12 @@ numerical_cols = [
 # print(f"Normalizing {len(numerical_cols)} numerical features...")
 # scaler = StandardScaler()
 # X[numerical_cols] = scaler.fit_transform(X[numerical_cols])
+
+with open("remaining_features.txt", "w") as f:
+    for col in X.columns:
+        f.write(f"{col}\n")
+print(f"Saved {len(X.columns)} remaining feature names to remaining_features.txt")
+
 
 print("Starting SMOTE resampling...")
 if categorical_columns:
@@ -453,3 +460,5 @@ submission = pd.DataFrame({"OrderID": merged_test_df["OrderID"], "IsRisky": y_pr
 print(submission.head())
 submission.to_csv("submission_lightgbm.csv", index=False)
 print("Submission saved to submission_lightgbm.csv")
+
+# Save remaining feature columns to a txt file
