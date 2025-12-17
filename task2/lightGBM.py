@@ -3,19 +3,17 @@ from imblearn.over_sampling import SMOTE, SMOTENC
 from sklearn.preprocessing import RobustScaler, StandardScaler
 from sklearn.decomposition import PCA
 
-# Load the datasets
 train_transactions = pd.read_csv("dataset/globalmart_train_transactions.csv")
 train_identity = pd.read_csv("dataset/globalmart_train_identity.csv")
 
 # Merge with left join (transactions as left table)
 merged_df = train_transactions.merge(train_identity, how="left", on="OrderID")
-# Display the result
 print(merged_df.head())
 print(f"Merged dataset shape: {merged_df.shape}")
 
 
-# --- SMOTE Resampling Logic ---
-target_col = "IsRisky"  # Replace with your actual target column name
+#SMOTE Resampling
+target_col = "IsRisky"
 categorical_columns = [
     "IdentityFeature12",
     "IdentityFeature13",
@@ -62,7 +60,7 @@ categorical_columns = [
     "MatchStatus7",
     "MatchStatus8",
     "MatchStatus9",
-]  # Put your categorical column names here
+] 
 
 
 
@@ -291,7 +289,7 @@ X = merged_df.drop(
     
 y = merged_df[target_col]
 
-# --- Drop High Missing Value Columns ---
+#Drop High Missing Value columns
 missing_threshold = 0.90
 missing_series = X.isnull().mean()
 cols_to_drop = missing_series[missing_series > missing_threshold].index.tolist()
@@ -302,12 +300,11 @@ print(
 if cols_to_drop:
     print(f"Columns dropped: {cols_to_drop}")
     X = X.drop(columns=cols_to_drop)
-    # Update categorical_columns list to remove any that were dropped
     categorical_columns = [
         col for col in categorical_columns if col not in cols_to_drop
     ]
 
-# Handle Missing Values (SMOTE requires no NaNs)
+# Handle Missing Values 
 # Track columns with missing values to replicate flags in test set
 cols_with_missing_in_train = [col for col in X.columns if X[col].isnull().any()]
 
@@ -323,8 +320,7 @@ for col in X.columns:
         X[col] = X[col].fillna(0)
 
 
-# --- Normalize Numerical Features ---
-# Identify numerical columns (exclude categorical, OrderID, and missing flags)
+# Normalize Numerical Features
 numerical_cols = [
     col
     for col in X.columns
@@ -334,7 +330,7 @@ numerical_cols = [
     and X[col].dtype != "object"
 ]
 
-# print(f"Normalizing {len(numerical_cols)} numerical features...")
+# Tested normalization, but result not good, so commented out
 # scaler = StandardScaler()
 # X[numerical_cols] = scaler.fit_transform(X[numerical_cols])
 
@@ -352,7 +348,7 @@ else:
     smote = SMOTE(random_state=42)
 
 X_resampled, y_resampled = smote.fit_resample(X, y)
-# X_resampled, y_resampled = X, y
+
 print(f"Original shape: {X.shape}")
 print(f"Resampled shape: {X_resampled.shape}")
 print(f"Class distribution after resampling:\n{y_resampled.value_counts()}")
@@ -386,15 +382,13 @@ def _build_lgbm_classifier(use_gpu: bool):
     return lgb.LGBMClassifier(**params)
 
 
-# --- LightGBM Training and Prediction ---
+# LightGBM Training and Prediction
 
-# 1. Prepare Training Data
 # Drop OrderID if it exists, as it's not a feature
 feature_cols = [col for col in X_resampled.columns if col != "OrderID"]
 X_train = X_resampled[feature_cols].copy()
 y_train = y_resampled
 
-# 2. Prepare Test Data
 # Identify base features (excluding the generated missing flags)
 base_features = [c for c in feature_cols if not c.endswith("_is_missing")]
 X_test = merged_test_df[base_features].copy()
@@ -420,14 +414,12 @@ for col in X_test.columns:
     else:
         X_test[col] = X_test[col].fillna(-1)
 
-# Apply the same normalization to Test
-# Ensure we only transform columns that exist in X_test (should be all of them if logic is correct)
 valid_numerical_cols = [c for c in numerical_cols if c in X_test.columns]
 # if valid_numerical_cols:
 #     X_test[valid_numerical_cols] = scaler.transform(X_test[valid_numerical_cols])
+# commented out as normalization not used
 
-# 3. Convert Categorical Columns to 'category' dtype for LightGBM
-# LightGBM handles 'category' dtype efficiently
+# Convert Categorical Columns to 'category' dtype for LightGBM
 for col in X_train.columns:
     if X_train[col].dtype == "object":
         X_train[col] = X_train[col].astype("category")
@@ -435,7 +427,7 @@ for col in X_train.columns:
 
 print(f"Training with {len(feature_cols)} features.")
 
-# 4. Train Model
+# Train Model
 clf = _build_lgbm_classifier(use_gpu=False)
 clf.fit(X_train, y_train)
 
@@ -449,15 +441,13 @@ print(f"Training F1 Score (Resampled): {train_f1:.4f}")
 print("\nClassification Report (Training):")
 print(classification_report(y_train, y_train_pred))
 
-# 5. Predict
+# Predict
 print("Predicting...")
 y_pred = clf.predict(X_test)
 
-# 6. Create Submission
 submission = pd.DataFrame({"OrderID": merged_test_df["OrderID"], "IsRisky": y_pred})
 
 print(submission.head())
 submission.to_csv("submission_lightgbm.csv", index=False)
 print("Submission saved to submission_lightgbm.csv")
 
-# Save remaining feature columns to a txt file

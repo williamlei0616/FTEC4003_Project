@@ -45,7 +45,7 @@ def run_svm(train_path, test_path, output_path, kernel='rbf', C=1.0, tune=False)
     
     # Add Index column to output
     output_df = pd.DataFrame({
-        'Index': X_test.index + 1,  # If your test set index starts at 0, add 1
+        'Index': X_test.index + 1,  # If test set index starts at 0, add 1
         'Status': y_pred
     })
     output_df.to_csv(output_path, index=False)
