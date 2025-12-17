@@ -1,4 +1,7 @@
 # FTEC4003_Project
+- Ho Man Hin Vincent - 1155193238
+- Huang Ying Lam - 1155192046
+- Lei Wai Lun - 1155194117
 
 ## Project Overview
 This project contains machine learning solutions for financial transaction anomaly detection, divided into two main tasks using various classification algorithms and ensemble methods.
@@ -22,7 +25,17 @@ Lists Python dependencies required for the project:
 
 ---
 
+### Materials Directory (`materials/`)
+
+#### `Course Project.pdf`
+Official course project documentation and requirements.
+
+---
+
 ### Task 1: Basic Classification Models (`materials/Task1/`)
+
+#### Documentation
+- **`Task-1- Anomalous-Transaction-Identification.pdf`**: Detailed Task 1 specifications and requirements
 
 #### Data Files
 - **`finsecure_train.csv`**: Training dataset containing transaction features with `Status` labels
@@ -31,6 +44,7 @@ Lists Python dependencies required for the project:
 
 #### Executables
 - **`evaluate_mac_1`**: macOS evaluation executable to score Task 1 submissions
+- **`evaluate_windows_1.exe`**: Windows evaluation executable to score Task 1 submissions
 - **`True`**: Binary/configuration file (potentially for model settings)
 
 #### Main Script
@@ -86,11 +100,9 @@ Contains subdirectories for each model's predictions:
 ### Task 2: Advanced Ensemble Methods (`task2/`)
 
 #### Data Files & Submissions
-- **`submission_lightgbm.csv`**: Final predictions using LightGBM model
-- **`submission_xgb.csv`**: Final predictions using XGBoost model
+- **`8_submission_2.csv`**: Final predictions using LightGBM model
+- **`submission_xgb.csv`**: Previous approach of XGB
 
-#### Executables
-- **`evaluate_mac_2`**: macOS evaluation executable to score Task 2 submissions
 
 #### Main Model Implementations
 
@@ -132,32 +144,3 @@ Contains subdirectories for each model's predictions:
   - Outputs: `v_feature_drop_test_results.txt`, temporary submission files per feature
 
 ---
-
-## Workflow Summary
-
-### Task 1 Workflow:
-1. Prepare training/test data (`finsecure_train.csv`, `finsecure_test.csv`)
-2. Run `test.py` to execute all models automatically, or run individual model scripts
-3. Models generate predictions in `results/` subdirectories
-4. Use `evaluate_mac_1` to score predictions against ground truth
-
-### Task 2 Workflow:
-1. Datasets merged from transaction and identity files
-2. Extensive feature engineering and selection
-3. Class balancing with SMOTE
-4. Train LightGBM or XGBoost models
-5. Feature importance analysis with testing scripts
-6. Generate final submissions
-7. Evaluate using `evaluate_mac_2`
-
----
-
-## Key Features
-- **Multiple ML Algorithms**: Decision Trees, Random Forest, KNN, Naive Bayes, SVM
-- **Advanced Ensemble Methods**: LightGBM, XGBoost
-- **Hyperparameter Tuning**: GridSearchCV integration
-- **Class Imbalance Handling**: SMOTE/SMOTENC resampling
-- **Feature Engineering**: Missing value flags, categorical encoding, feature selection
-- **Automated Testing**: Comprehensive test scripts with evaluation metrics
-- **Systematic Feature Analysis**: Automated scripts for feature importance testing
-
