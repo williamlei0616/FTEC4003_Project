@@ -4,6 +4,7 @@ KNN Classifier for Anomalous Transaction Identification
 import pandas as pd
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
+from sklearn.preprocessing import StandardScaler
 import sys
 
 # Load data
@@ -22,22 +23,34 @@ def tune_knn(X_train, y_train):
         'weights': ['uniform', 'distance'],
         'metric': ['euclidean', 'manhattan']
     }
-    grid = GridSearchCV(KNeighborsClassifier(), param_grid, cv=5, scoring='f1')
+    grid = GridSearchCV(KNeighborsClassifier(), param_grid, cv=3, scoring='f1')
     grid.fit(X_train, y_train)
-    print(f"Best KNN Params: {grid.best_params_}")
+    
+    # Print best parameters in consistent format
+    print("Best parameters:")
+    for key, value in grid.best_params_.items():
+        print(f"  {key}: {value}")
+    print("---")
+    
     return grid.best_estimator_
 
 def run_knn(train_path, test_path, output_path, n_neighbors=5, tune=False):
     X_train, y_train, X_test = load_data(train_path, test_path)
+    
+    # Scale features for KNN
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
+    
     if tune:
-        clf = tune_knn(X_train, y_train)
+        clf = tune_knn(X_train_scaled, y_train)
     else:
         clf = KNeighborsClassifier(n_neighbors=n_neighbors)
-        clf.fit(X_train, y_train)
-    y_pred = clf.predict(X_test)
-    # Add Index column to output
+        clf.fit(X_train_scaled, y_train)
+    y_pred = clf.predict(X_test_scaled)
+    
     output_df = pd.DataFrame({
-        'Index': X_test.index + 1,  # If your test set index starts at 0, add 1
+        'Index': X_test.index + 1,
         'Status': y_pred
     })
     output_df.to_csv(output_path, index=False)

@@ -25,7 +25,13 @@ def tune_svm(X_train, y_train):
     }
     grid = GridSearchCV(SVC(random_state=42), param_grid, cv=3, scoring='f1')
     grid.fit(X_train, y_train)
-    print(f"Best SVM Params: {grid.best_params_}")
+    
+    # Print best parameters in consistent format
+    print("Best parameters:")
+    for key, value in grid.best_params_.items():
+        print(f"  {key}: {value}")
+    print("---")
+    
     return grid.best_estimator_
 
 def run_svm(train_path, test_path, output_path, kernel='rbf', C=1.0, tune=False):
