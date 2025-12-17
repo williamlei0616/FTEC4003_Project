@@ -1,5 +1,0 @@
-Feature Drop Test Results
-============================================================
-Using GPU: True
-Results will be updated as each feature is tested...
-
